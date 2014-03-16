@@ -1,0 +1,9 @@
+/build
+.gradle
+.settings
+bin
+.project
+.classpath
+*~
+jspf.cache
+/node_modules
