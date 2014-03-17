@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-wait');
+	grunt.loadNpmTasks('grunt-http');
 	grunt.loadNpmTasks('grunt-html2js');
 	grunt.loadNpmTasks('grunt-ngmin');
 
@@ -20,9 +20,9 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				// the files to concatenate
-				src: ['build/impl/js/**/*.js'],
+				src: ['build/**/*.js'],
 				// the location of the resulting JS file
-				dest: 'src/impl/resources/<%= pkg.name %>.js'
+				dest: 'bin/<%= pkg.name %>.js'
 			}
 		},
 		
@@ -30,8 +30,8 @@ module.exports = function(grunt) {
 			build_js: {
 				files: [{
 					src: ['**/*.js'],
-					dest: 'build/impl/js',
-					cwd: 'src/impl/js',
+					dest: 'build',
+					cwd: 'src',
 					expand: true
 				}]
 			}
@@ -40,11 +40,11 @@ module.exports = function(grunt) {
 		html2js: {
 			app: {
 				options: {
-					base: 'src/impl/js',
+					base: 'src',
 					module: 'templates-<%= pkg.name %>'
 				},
-				src: [ 'src/impl/js/**/*.tpl.html' ],
-				dest: 'build/impl/js/templates.js'
+				src: [ 'src/**/*.tpl.html' ],
+				dest: 'build/templates.js'
 			}
 		},
 
@@ -63,15 +63,15 @@ module.exports = function(grunt) {
 			compile: {
 				files: [{
 					src: [ '**/*.js' ],
-					cwd: 'build/impl/js',
-					dest: 'build/impl/js',
+					cwd: 'build',
+					dest: 'build',
 					expand: true
 				}]
 			}
 		},
 
 		jshint: {
-			src: ['src/impl/js/**/*.js'],
+			src: ['src/**/*.js'],
 			gruntfile: ['gruntfile.js'],
 			options: {
 				curly: true,
@@ -85,6 +85,21 @@ module.exports = function(grunt) {
 			globals: {}
 		},
 
+		http: {
+			compile: {
+				options: {
+					url: 'http://localhost:8080/admin/files/<%= pkg.id %>?contents',
+					method: 'PUT',
+					json: {
+						content: "content"
+					},
+					sourceField: 'json.content'
+				},
+				files: {
+					'bin/<%= pkg.name %>.js': 'bin/<%= pkg.name %>.js'
+				}
+			}
+		},
 
 		delta: {
 			options: {
@@ -100,37 +115,21 @@ module.exports = function(grunt) {
 			},
 
 			jssrc: {
-				files: ['src/impl/js/**/*.js'],
-				tasks: ['jshint:src', 'copy:build_js', 'ngmin', 'concat', 'wait']
+				files: ['src/**/*.js'],
+				tasks: ['jshint:src', 'copy:build_js', 'ngmin', 'concat', 'http']
 			},
 
 			tpls: {
-				files: ['src/impl/js/**/*.tpl.html'],
-				tasks: ['html2js', 'ngmin', 'concat', 'wait']
+				files: ['src/**/*.tpl.html'],
+				tasks: ['html2js', 'ngmin', 'concat', 'http']
 			},
 		},
 		
-		wait: {
-			options: {
-				delay: 5000
-			},
-			
-			pause: { 
-				options: {
-					before : function(options) {
-						console.log('Waiting to reload: %dms ms', options.delay);
-					},
-					after : function() {
-						console.log('Reloading now!');
-					}
-				}
-			}
-		},
 
-		clean: ['build/impl/js']
+		clean: ['build']
 	});
 	grunt.renameTask('watch','delta');
 	grunt.registerTask('watch', ['build', 'delta']);
-	grunt.registerTask('build', ['clean', 'copy:build_js', 'html2js', 'ngmin', 'concat', 'uglify']);
+	grunt.registerTask('build', ['clean', 'copy:build_js', 'html2js', 'ngmin', 'concat', 'uglify', 'http']);
 	grunt.registerTask('default', ['build']);
 };

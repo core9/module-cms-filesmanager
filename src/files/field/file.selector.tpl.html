@@ -1,0 +1,32 @@
+<div>
+  <div class="modal-header">
+    <h3>Select a file</h3>
+  </div>
+  <div class="modal-body">
+    <fieldset>
+      <legend>Folder: {{folder}}</legend>
+      <table class="table table-striped">
+        <tr>
+          <th>Filename</th>
+          <th>Content Type</th>
+        </tr>
+        <tr ng-show="folder !== '/'">
+          <td><a ng-click="switchTo('/')">..</td>
+          <td></td>
+        </tr>
+        <tr ng-repeat="file in files| filter:{ contentType: 'inode/directory'}" ng-click="switchTo(file.filename)">
+          <td>{{file.filename}}</td>
+          <td>{{file.contentType}}</td>
+        </tr>
+        <tr ng-repeat="file in files| filter:{ contentType: '!inode/directory'}" ng-click="select(file)">
+          <td ng-class="{success: selected == file}">{{file.filename}}</td>
+          <td ng-class="{success: selected == file}">{{file.contentType}}</td>
+        </tr>
+      </table>
+    </fieldset>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()">OK</button>
+    <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<div class="page-header">
+  <h1>Files <small><i class="icon-double-angle-right"></i> manage your files</small></h1>
+  <fieldset>
+    <legend>Actions</legend>
+    <div>
+      <div ng-controller="FileUploadCtrl">
+        <div ng-file-drop="onFileSelect($files)" ng-file-drag-over-class="bg-success" class="well text-center" ng-show="dropSupported">
+          <p>Drop files here or</p>
+          <button class="btn btn-success" ng-click="addFile()"><i class="fa fa-floppy-o"></i> Create new file</button>
+        </div>
+        <div ng-file-drop-available="dropSupported=true" ng-show="!dropSupported">HTML5 Drop File is not supported!</div>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Folder: {{folder}}</legend>
+    <table class="table table-striped">
+      <tr>
+        <th>Filename</th>
+        <th>Content Type</th>
+        <th>Actions</th>
+      </tr>
+      <tr ng-show="folder !== '/'">
+        <td><a ng-click="switchTo('/')">..</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr ng-repeat="file in files| filter:{ contentType: 'inode/directory'}">
+        <td><a ng-click="switchTo(file.filename)">{{file.filename}}</a></td>
+        <td>{{file.contentType}}</td>
+        <td>
+          <a class="btn btn-warning" href="#/config/files/{{file._id}}"><i class="fa fa-pencil"></i></button>
+        </td>
+      </tr>
+      <tr ng-repeat="file in files| filter:{ contentType: '!inode/directory'}">
+        <td><a href="#/config/files/{{file._id}}">{{file.filename}}</a></td>
+        <td>{{file.contentType}}</td>
+        <td>
+          <a class="btn btn-warning" href="#/config/files/{{file._id}}"><i class="fa fa-pencil"></i></a>
+          <button class="btn btn-danger" ng-click="remove(file)"><i class="fa fa-trash-o"></i></button>
+        </td>
+      </tr>
+    </table>
+  </fieldset>
+</div>
