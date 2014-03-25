@@ -1,31 +1,35 @@
-<div class="page-header">
-	<h1>File <small>{{file.filename}}</small></h1>
-	<fieldset>
-		<legend>File properties</legend>
-		<div class="input-group">
-			<span class="input-group-addon">Type</span>
-			<button type="button" class="btn btn-default form-control dropdown-toggle">{{file.metadata.type}}<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu selectbox">
-				<li ng-repeat="type in types"><a ng-click="file.metadata.type = type">{{type}}</a></li>
-			</ul>
-		</div>
-		<div class="input-group">
-			<span class="input-group-addon">Name</span>
-			<input type="text" class="form-control" ng-model="file.filename" />
-		</div>
-		<div class="input-group">
-			<span class="input-group-addon">Content Type</span>
-			<input type="text" class="form-control" ng-model="file.contentType" />
-		</div>
-		<fieldset>
-			<legend ng-click="showPreview = !showPreview">File preview</legend>
-			<div ng-if="showPreview">
-				<div cn-file-editor filename="/admin/files/{{file._id}}?contents" filetype="file.contentType" />
-			</div>
-		<fieldset>
-			<legend>File actions</legend>
-			<button class="btn btn-success" ng-click="save()">Save</button>
-		</fieldset>
-	</fieldset>
-</div>
+<h1 class="page-header">File <small>{{file.filename}}</small></h1>
+<fieldset>
+	<legend>File properties</legend>
+  <div class="form-group row">
+    <label class="col-md-2 control-label">Type</label>  
+    <div class="col-md-8">
+      <button type="button" class="btn btn-default form-control dropdown-toggle">{{file.metadata.type}}<span class="caret"></span></button>
+      <ul class="dropdown-menu selectbox">
+        <li ng-repeat="type in types"><a ng-click="file.metadata.type = type">{{type}}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-md-2 control-label">Name</label>  
+    <div class="col-md-8">
+      <input type="text" placeholder="placeholder" ng-model="file.filename" class="form-control input-md">
+    </div>
+  </div>
+	<div class="form-group row">
+    <label class="col-md-2 control-label">Content Type</label>  
+    <div class="col-md-8">
+      <input type="text" placeholder="placeholder" ng-model="file.contentType" class="form-control input-md">
+    </div>
+  </div>
+</fieldset>
+<fieldset>
+	<legend ng-click="showPreview = !showPreview">File preview</legend>
+	<div ng-if="showPreview">
+		<div cn-file-editor filename="/admin/files/{{file._id}}?contents" filetype="file.contentType"></div>
+	</div>
+</fieldset>
+<fieldset>
+	<legend>File actions</legend>
+	<button class="btn btn-success" ng-click="save()">Save</button>
+</fieldset>

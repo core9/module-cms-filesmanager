@@ -69,7 +69,10 @@ angular.module('core9Dashboard.files', [
         templateUrl: 'files/files.tpl.html'
       }
     },
-    data:{ pageTitle: 'Files' }
+    data:{ 
+      pageTitle: 'Files',
+      sidebar: 'config'
+    }
   })
   .state('fileedit',  {
     url: '/config/files/:id',
@@ -79,7 +82,10 @@ angular.module('core9Dashboard.files', [
         templateUrl: 'files/edit.tpl.html'
       }
     },
-    data:{ pageTitle: 'Files' }
+    data:{ 
+      pageTitle: 'Files',
+      sidebar: 'config'
+    }
   });
 })
 
@@ -132,7 +138,8 @@ angular.module('core9Dashboard.files', [
     'css': 'text/css',
     'less': 'text/less',
     'jpg': 'image/jpeg',
-    'dir': 'inode/directory'
+    'dir': 'inode/directory',
+    'js': 'application/javascript'
   };
   $scope.file = FileFactory.get({fileid: $stateParams.id});
   $scope.types = ['Directory', 'File'];
@@ -300,7 +307,7 @@ angular.module('core9Dashboard.files', [
 })
 
 .run(function(MenuService, FileViewer, FieldConfig) {
-  MenuService.add('config', {title: "Files", weight: 150, link: "/config/files"});
+  MenuService.add('config', {title: "Files", weight: 150, link: "files"});
   new FileViewer({name: 'image', template: "files/viewer/image.tpl.html"})
     .addContentType([
       'image/bmp','image/cis-cod','image/gif',
@@ -313,7 +320,11 @@ angular.module('core9Dashboard.files', [
       'image/x-xpixmap','image/x-xwindowdump'
     ]).save();
   new FileViewer({name: 'less', template: "files/viewer/less.tpl.html"}).addContentType(['text/css', 'text/less']).save();
-  new FileViewer({name: 'text', template: "files/viewer/text.tpl.html"}).addContentType(['text/plain']).save();
+  new FileViewer({name: 'text', template: "files/viewer/text.tpl.html"})
+    .addContentType([
+      'text/plain',
+      'application/javascript'
+    ]).save();
   new FieldConfig({type: 'file'})
     .addWidget('file', {template: "files/field/file.tpl.html", config: "files/field/file.config.tpl.html"}).save();
 
