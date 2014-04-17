@@ -327,6 +327,7 @@ angular.module('core9Dashboard.files', [
     ]).save();
   new FieldConfig({type: 'file'})
     .addWidget('file', {template: "files/field/file.tpl.html", config: "files/field/file.config.tpl.html"}).save();
+  FieldConfig.get('string').addWidget('file', {template: "files/field/file.tpl.html", config: "files/field/file.config.tpl.html"}).save();
 
 })
 ;
