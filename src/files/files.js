@@ -4,6 +4,7 @@ angular.module('core9Dashboard.files', [
   'ngResource',
   'angularFileUpload',
   'core9Dashboard.menu',
+  'core9Dashboard.config',
   'ui.codemirror'
   ])
 
@@ -71,11 +72,12 @@ angular.module('core9Dashboard.files', [
     },
     data:{ 
       pageTitle: 'Files',
-      sidebar: 'config'
+      sidebar: 'config',
+      context: 'filescontext'
     }
   })
   .state('fileedit',  {
-    url: '/config/files/:id',
+    url: '/config/files/:id?bucket',
     views: {
       "main": {
         controller: 'EditFileCtrl',
@@ -84,28 +86,104 @@ angular.module('core9Dashboard.files', [
     },
     data:{ 
       pageTitle: 'Files',
-      sidebar: 'config'
+      sidebar: 'config',
+      context: 'filescontext'
     }
-  });
+  })
+  .state('filessettings',  {
+    url: '/config/filessettings',
+    views: {
+      "main": {
+        controller: 'FilesSettingsCtrl',
+        templateUrl: 'files/settings.tpl.html'
+      }
+    },
+    data:{ 
+      pageTitle: 'Files',
+      sidebar: 'config',
+      context: 'filescontext'
+    }
+  })
+  .state('filesbucket',  {
+    url: '/config/filessettings/:bucketid',
+    views: {
+      "main": {
+        controller: 'FilesSettingsBucketCtrl',
+        templateUrl: 'files/bucket/edit.tpl.html'
+      }
+    },
+    resolve: {
+      bucket: ["ConfigFactory", "$stateParams", function(ConfigFactory, $stateParams) {
+        return ConfigFactory.get({configtype: 'bucket', id: $stateParams.bucketid});
+      }]
+    },
+    data:{ 
+      pageTitle: 'Files',
+      sidebar: 'config',
+      context: 'filescontext'
+    }
+  })
+
+  ;
 })
 
-.controller('FilesCtrl', function($scope, $state, $location, FileFactory) {
+.controller('FilesCtrl', function($scope, $state, $location, FileFactory, ConfigFactory) {
+  $scope.buckets = ConfigFactory.query({configtype: 'bucket'});
+  $scope.standardBucket = {bucket: "Standard"};
+
+  $scope.selectBucket = function(bucket) {
+    $scope.selectedBucket = bucket;
+    $scope.folder = '/';
+  };
+
+  $scope.$watch('selectedBucket', function() {
+    if($scope.selectedBucket !== undefined && $scope.selectedBucket._id !== undefined) {
+      $location.search('bucket', $scope.selectedBucket._id);
+    } 
+    $scope.update();
+  });
+
   var dir = $location.search().dir;
   if(dir !== undefined && dir !== null) {
     $scope.folder = dir;
   } else {
     $scope.folder = '/';
   }
-  $scope.files = FileFactory.query({folder: $scope.folder});
+
+  var bucket = $location.search().bucket;
+  if(bucket !== undefined && bucket !== null) {
+    ConfigFactory.get({configtype: 'bucket', id: bucket}, function (data) {
+      $scope.selectedBucket = data;
+    });
+  } else {
+    $scope.selectedBucket = $scope.standardBucket;
+  }
+  
   $scope.addFile = function() {
     var file = new FileFactory();
     file.filename = "ReplaceMe";
     file.metadata = {folder: $scope.folder, type: "File"};
-    file.$save(function(data) {
-      $scope.files.push(data);
-      $state.go("fileedit", {id: data._id});
-    });
+    if($scope.selectedBucket !== undefined && $scope.selectedBucket._id !== undefined) {
+      file.$save({bucket: $scope.selectedBucket._id}, function(data) {
+        $scope.files.push(data);
+        $state.go("fileedit", {id: data._id, bucket: $scope.selectedBucket._id});
+      });
+    } else {
+      file.$save(function(data) {
+        $scope.files.push(data);
+        $state.go("fileedit", {id: data._id});
+      });
+    }
   };
+
+  $scope.edit = function(file) {
+    if($scope.selectedBucket._id !== undefined) {
+      $state.go("fileedit", {id: file._id, bucket: $scope.selectedBucket._id});  
+    } else {
+      $state.go("fileedit", {id: file._id});
+    }
+  };
+
   $scope.switchTo = function(newFolder) {
     var folder = "/";
     if(newFolder === "/") {
@@ -116,14 +194,27 @@ angular.module('core9Dashboard.files', [
     }
     $scope.folder = folder;
   };
+
   $scope.update = function() {
-    $scope.files = FileFactory.query({folder: $scope.folder});
+    if($scope.selectedBucket !== undefined && $scope.selectedBucket._id !== undefined) {
+      $scope.files = FileFactory.query({folder: $scope.folder, bucket: $scope.selectedBucket._id});
+    } else {
+      $scope.files = FileFactory.query({folder: $scope.folder});
+    }
   };
+
   $scope.remove = function(file) {
-    file.$remove(function() {
-      $scope.update();
-    });
+    if($scope.selectedBucket !== undefined && $scope.selectedBucket._id !== undefined) {
+      file.$remove({bucket: $scope.selectedBucket._id}, function() {
+        $scope.update();
+      });
+    } else {
+      file.$remove(function() {
+        $scope.update();
+      });
+    }
   };
+
   $scope.$watch('folder', function() {
     if($scope.folder !== undefined) {
       $location.search('dir', $scope.folder);
@@ -133,6 +224,8 @@ angular.module('core9Dashboard.files', [
 })
 
 .controller('EditFileCtrl', function($scope, $location, FileFactory, $stateParams, FileViewer) {
+  var bucket = $location.search().bucket;
+  
   $scope.mimeTypes = {
     'txt': 'text/plain',
     'css': 'text/css',
@@ -141,12 +234,26 @@ angular.module('core9Dashboard.files', [
     'dir': 'inode/directory',
     'js': 'application/javascript'
   };
-  $scope.file = FileFactory.get({fileid: $stateParams.id});
+  if(bucket !== undefined && bucket !== null) {
+    $scope.file = FileFactory.get({fileid: $stateParams.id, bucket: bucket});  
+    console.log($scope.file);
+    $scope.suffix = "bucket=" + bucket;
+  } else {
+    $scope.file = FileFactory.get({fileid: $stateParams.id});
+    $scope.suffix = "";
+  }
+  
   $scope.types = ['Directory', 'File'];
   $scope.save = function() {
-    $scope.file.$update(function() {
-      $scope.back();  
-    });
+    if(bucket !== undefined && bucket !== null) {
+      $scope.file.$update({bucket: bucket}, function() {
+        $scope.back();  
+      });
+    } else {
+      $scope.file.$update(function() {
+        $scope.back();  
+      });
+    }
   };
   $scope.$watch('file.metadata.type', function(newValue, oldValue) {
     if(newValue === 'Directory') {
@@ -163,6 +270,40 @@ angular.module('core9Dashboard.files', [
   });
   $scope.back = function() {
     $location.path("/config/files").search("dir", $scope.file.metadata.folder);
+  };
+})
+
+.controller("FilesSettingsCtrl", function ($scope, $state, ConfigFactory) {
+  $scope.buckets = ConfigFactory.query({configtype: 'bucket'});
+
+  $scope.add = function(name, database) {
+    var newBucket = new ConfigFactory();
+    newBucket.configtype = 'bucket';
+    newBucket.bucket = name;
+    newBucket.database = database;
+    newBucket.$save(function () {
+      $scope.buckets.push(newBucket);
+      $scope.edit(newBucket);
+    });
+  };
+
+  $scope.edit = function(bucket) {
+    $state.go("filesbucket", {bucketid: bucket._id});
+  };
+
+  $scope.remove = function(bucket, index) {
+    bucket.$remove(function() {
+      $scope.buckets.splice(index, 1);
+    });
+  };
+})
+
+.controller("FilesSettingsBucketCtrl", function ($scope, $state, bucket) {
+  $scope.bucket = bucket;
+  $scope.save = function () {
+    $scope.bucket.$update(function() {
+      $state.go('filessettings');
+    });
   };
 })
 
@@ -186,21 +327,34 @@ angular.module('core9Dashboard.files', [
   };
 })
 
-.controller('FileUploadCtrl', function($scope, $upload, FileFactory) {
+.controller('FileUploadCtrl', function($scope, $location, $upload, FileFactory) {
+  var bucket = $location.search().bucket;
   var progress = function(evt) {
     console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
   };
   var success = function(data, status, headers, config) {
-    $scope.$parent.files = FileFactory.query({folder: $scope.$parent.folder});
+    if(bucket !== undefined && bucket !== null) {
+      $scope.$parent.files = FileFactory.query({folder: $scope.$parent.folder, bucket: bucket});
+    } else {
+      $scope.$parent.files = FileFactory.query({folder: $scope.$parent.folder});
+    }
   };
   $scope.onFileSelect = function($files) {
     for (var i = 0; i < $files.length; i++) {
       var file = $files[i];
-      $scope.upload = $upload.upload({
-        url: 'admin/files',
-        file: file,
-        fileFormDataName: $scope.$parent.folder,
-      }).progress(progress).success(success);
+      if(bucket !== undefined && bucket !== null) {
+          $scope.upload = $upload.upload({
+          url: 'admin/files?bucket=' + bucket,
+          file: file,
+          fileFormDataName: $scope.$parent.folder,
+        }).progress(progress).success(success);
+      } else {
+        $scope.upload = $upload.upload({
+          url: 'admin/files',
+          file: file,
+          fileFormDataName: $scope.$parent.folder,
+        }).progress(progress).success(success);
+      }
     }
   };
 })
@@ -308,6 +462,7 @@ angular.module('core9Dashboard.files', [
 
 .run(function(MenuService, FileViewer, FieldConfig) {
   MenuService.add('config', {title: "Files", weight: 150, link: "files"});
+  MenuService.add('filescontext', {title: "Settings", weight: 150, link: "filessettings"});
   new FileViewer({name: 'image', template: "files/viewer/image.tpl.html"})
     .addContentType([
       'image/bmp','image/cis-cod','image/gif',

@@ -26,7 +26,7 @@
 <fieldset>
 	<legend ng-click="showPreview = !showPreview">File preview</legend>
 	<div ng-if="showPreview">
-		<div cn-file-editor filename="/admin/files/{{file._id}}?contents" filetype="file.contentType"></div>
+		<div cn-file-editor filename="/admin/files/{{file._id}}?contents&{{suffix}}" filetype="file.contentType"></div>
 	</div>
 </fieldset>
 <fieldset>

@@ -1,0 +1,28 @@
+<h1 class="page-header">Files management</h1>
+<blockquote>Your standard statics bucket is always published under /static, you can add more paths and buckets here.</blockquote>
+<table class="table table-striped">
+  <tr>
+    <th>Bucket name</th>
+    <th>Database</th>
+    <th>Actions</th>
+  </tr>
+  <tr ng-repeat="bucket in buckets">
+    <td>{{bucket.bucket}}</td>
+    <td>{{bucket.database}}</td>
+    <td>
+      <button class="btn btn-success" ng-click="edit(bucket)"><i class="fa fa-pencil"></i></button>
+      <button class="btn btn-danger" ng-click="remove(bucket, $index)"><i class="fa fa-trash-o"></i></button>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <input type="text" placeholder="New bucket name" ng-model="newBucket" class="form-control input-md">
+    </td>
+    <td>
+      <input type="text" placeholder="Database" ng-model="newDatabase" class="form-control input-md">
+    </td>
+    <td>
+      <button class="btn btn-success" ng-click="add(newBucket, newDatabase)"><i class="fa fa-plus"></i> Add</button>
+    </td>
+  </tr>
+</table>

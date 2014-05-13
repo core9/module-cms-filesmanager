@@ -1,5 +1,14 @@
 <div class="page-header">
-  <h1>Files <small><i class="icon-double-angle-right"></i> manage your files</small></h1>
+  <h1>Files <small><i class="icon-double-angle-right"></i> manage your files</small>
+  <div class="btn-group pull-right">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{selectedBucket.bucket}} <span class="caret"></span></button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a ng-click="selectBucket(standardBucket)">Standard</a></li>
+      <li ng-repeat="bucket in buckets"><a ng-click="selectBucket(bucket)">{{bucket.bucket}}</a></li>
+    </ul>
+  </div>
+  </h1>
+  <!-- Single button -->
   <fieldset>
     <legend>Actions</legend>
     <div>
@@ -29,14 +38,14 @@
         <td><a ng-click="switchTo(file.filename)">{{file.filename}}</a></td>
         <td>{{file.contentType}}</td>
         <td>
-          <a class="btn btn-warning" href="#/config/files/{{file._id}}"><i class="fa fa-pencil"></i></button>
+          <a class="btn btn-warning" ng-click="edit(file)"><i class="fa fa-pencil"></i></button>
         </td>
       </tr>
       <tr ng-repeat="file in files| filter:{ contentType: '!inode/directory'}">
-        <td><a href="#/config/files/{{file._id}}">{{file.filename}}</a></td>
+        <td><a ng-click="edit(file)">{{file.filename}}</a></td>
         <td>{{file.contentType}}</td>
         <td>
-          <a class="btn btn-warning" href="#/config/files/{{file._id}}"><i class="fa fa-pencil"></i></a>
+          <a class="btn btn-warning" ng-click="edit(file)"><i class="fa fa-pencil"></i></a>
           <button class="btn btn-danger" ng-click="remove(file)"><i class="fa fa-trash-o"></i></button>
         </td>
       </tr>
