@@ -129,7 +129,7 @@ angular.module('core9Dashboard.files', [
 
 .controller('FilesCtrl', function($scope, $state, $location, FileFactory, ConfigFactory) {
   $scope.buckets = ConfigFactory.query({configtype: 'bucket'});
-  $scope.standardBucket = {bucket: "Standard"};
+  $scope.standardBucket = {name: "Standard"};
 
   $scope.selectBucket = function(bucket) {
     $scope.selectedBucket = bucket;
@@ -279,7 +279,7 @@ angular.module('core9Dashboard.files', [
   $scope.add = function(name, database) {
     var newBucket = new ConfigFactory();
     newBucket.configtype = 'bucket';
-    newBucket.bucket = name;
+    newBucket.name = name;
     newBucket.database = database;
     newBucket.$save(function () {
       $scope.buckets.push(newBucket);

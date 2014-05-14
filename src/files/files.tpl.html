@@ -1,10 +1,10 @@
 <div class="page-header">
   <h1>Files <small><i class="icon-double-angle-right"></i> manage your files</small>
   <div class="btn-group pull-right">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{selectedBucket.bucket}} <span class="caret"></span></button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{selectedBucket.name}} <span class="caret"></span></button>
     <ul class="dropdown-menu" role="menu">
       <li><a ng-click="selectBucket(standardBucket)">Standard</a></li>
-      <li ng-repeat="bucket in buckets"><a ng-click="selectBucket(bucket)">{{bucket.bucket}}</a></li>
+      <li ng-repeat="bucket in buckets"><a ng-click="selectBucket(bucket)">{{bucket.name}}</a></li>
     </ul>
   </div>
   </h1>
